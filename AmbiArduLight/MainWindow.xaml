@@ -5,42 +5,99 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AmbiArduLight"
         mc:Ignorable="d"
-        TextElement.Foreground="#9d9d9d"
+        TextElement.Foreground="Black"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        WindowStartupLocation="CenterScreen"
         Title="AmbiArduLight" Height="350" Width="480" UseLayoutRounding="False" ResizeMode="CanMinimize" SizeToContent="WidthAndHeight"
         >
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="1*" />
-            <ColumnDefinition Width="1*"/>
-            <ColumnDefinition Width="1*"/>
-            <ColumnDefinition Width="1*"/>
-            <ColumnDefinition Width="1*"/>
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="1*"/>
-            <RowDefinition Height="1*"/>
-            <RowDefinition Height="1*"/>
-            <RowDefinition Height="3*"/>
-            <RowDefinition Height="1*"/>
-            <RowDefinition Height="1*"/>
-        </Grid.RowDefinitions>
-        <Rectangle Grid.Row="0" Grid.RowSpan="6" Fill="#353535" />
-        <Rectangle Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="4" Grid.RowSpan="6" Fill="#414042" />
+    <Border Background="#353535" Padding="4" CornerRadius="40,10,40,10">
+        <DockPanel>
+            <DockPanel x:Name="Title"  Margin="2" DockPanel.Dock="Top" MouseDown="Title_MouseDown">
+                <Button x:Name="CloseButton" Background="#9d9d9d" Width="20" DockPanel.Dock="Right" Click="CloseButton_Click" >X</Button>
+                <Button x:Name="MinimizeButton" Background="#9d9d9d" Width="20" DockPanel.Dock="Right" Click="MinimizeButton_Click" >_</Button>
+                <Label VerticalAlignment="Center" DockPanel.Dock="Top" Padding="190,0,5,0">AmbiArduinoLight</Label>
+            </DockPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                </Grid.RowDefinitions>
 
-        <Label Grid.Column="0" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center">Serial Port</Label>
-        <StackPanel x:Name="radioButtons" Grid.Column="1" Grid.ColumnSpan="4" Orientation="Horizontal">
-            <RadioButton VerticalAlignment="Center" Margin="6,2" >COM1</RadioButton>
-            <RadioButton VerticalAlignment="Center" Margin="6,2">COM2</RadioButton>
-            <RadioButton VerticalAlignment="Center" Margin="6,2">COM3</RadioButton>
-            <RadioButton VerticalAlignment="Center" Margin="6,2">COM4</RadioButton>
-            <RadioButton VerticalAlignment="Center" Margin="6,2">COM5</RadioButton>
-            <RadioButton VerticalAlignment="Center" Margin="6,2">COM6</RadioButton>
-        </StackPanel>
-        <Label Grid.Column="0" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">Top Pixels</Label>
-        <TextBlock Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="4" Name="text_top" VerticalAlignment="Center" Margin="1"></TextBlock>
-        <Label Grid.Column="0" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center">Bottom Pixels</Label>
-        <TextBlock Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="4" Name="text_bottom" VerticalAlignment="Center" Margin="1"></TextBlock>
-        <Button Grid.Column="0" Grid.Row="4" Margin="4" MinWidth="80" MinHeight="30" Click="Button_Click" Name="Start">Start</Button>
-        <Button Grid.Column="0" Grid.Row="5" Margin="4" MinWidth="80" MinHeight="30" Click="Button_Click_1" Name="Stop">Stop</Button>
-    </Grid>
+                <!--<Rectangle Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="4" Grid.RowSpan="6" Fill="#414042" />-->
+                <Rectangle Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="4" Grid.RowSpan="1" Fill="#e1004c">
+                    <Rectangle.Effect>
+                        <DropShadowEffect Direction="0" BlurRadius="1" ShadowDepth="-4" Opacity="0.5" RenderingBias="Quality"/>
+                    </Rectangle.Effect>
+                </Rectangle>
+
+                <Rectangle Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="4" Grid.RowSpan="2" Fill="#00a47f">
+                    <Rectangle.Effect>
+                        <DropShadowEffect Direction="90" BlurRadius="1" ShadowDepth="3" Opacity="0.5" RenderingBias="Quality"/>
+                    </Rectangle.Effect>
+                </Rectangle>
+
+                <Rectangle Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="4" Grid.RowSpan="1" Fill="#ff6200" >
+                    <Rectangle.Effect>
+                        <DropShadowEffect Direction="90" BlurRadius="1" ShadowDepth="3" Opacity="0.5" RenderingBias="Quality"/>
+                    </Rectangle.Effect>
+                </Rectangle>
+                
+                <Rectangle Grid.Row="0" Grid.RowSpan="6" Fill="#353535" >
+                    <Rectangle.Effect>
+                        <DropShadowEffect Direction="0" BlurRadius="1" ShadowDepth="4" Opacity="0.5" RenderingBias="Quality"/>
+                    </Rectangle.Effect>
+                </Rectangle>
+
+                <Label TextBlock.Foreground="#9d9d9d" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,2,0" >Serial Port</Label>
+                <StackPanel x:Name="radioButtons" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="4" Orientation="Horizontal">
+
+                    <RadioButton x:Name="radio_button1" VerticalAlignment="Center" Margin="6,2" Checked="RadioButton_Changed" >COM1</RadioButton>
+                    <RadioButton x:Name="radio_button2" VerticalAlignment="Center" Margin="6,2" Checked="RadioButton_Changed">COM2</RadioButton>
+                    <RadioButton x:Name="radio_button3" VerticalAlignment="Center" Margin="6,2" Checked="RadioButton_Changed">COM3</RadioButton>
+                    <RadioButton x:Name="radio_button4" VerticalAlignment="Center" Margin="6,2" Checked="RadioButton_Changed">COM4</RadioButton>
+                    <RadioButton x:Name="radio_button5" VerticalAlignment="Center" Margin="6,2" Checked="RadioButton_Changed">COM5</RadioButton>
+                    <RadioButton x:Name="radio_button6" VerticalAlignment="Center" Margin="6,2" Checked="RadioButton_Changed">COM6</RadioButton>
+                </StackPanel>
+
+                <Label TextBlock.Foreground="#9d9d9d" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,2,0">Top Pixels</Label>
+                <TextBlock Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="4" Name="text_top" VerticalAlignment="Center" Margin="2,0,0,0" Padding="6,0,0,0"></TextBlock>
+
+                <Label TextBlock.Foreground="#9d9d9d" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,2,0">Bottom Pixels</Label>
+                <TextBlock Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="4" Name="text_bottom" VerticalAlignment="Center" Margin="2,0,0,0" Padding="6,0,0,0"></TextBlock>
+
+                <Label TextBlock.Foreground="#9d9d9d" Grid.Column="0" Grid.Row="3" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,2,0">State</Label>
+                <TextBlock Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="4" Name="text_state" VerticalAlignment="Center" Margin="2,0,0,0" Padding="6,0,0,0"></TextBlock>
+
+                <TextBlock Grid.Column="1" Grid.Row="4" Grid.ColumnSpan="4" Grid.RowSpan="2" Name="text_error" VerticalAlignment="Top" Margin="4,6,0,4" Padding="6,0,0,0"></TextBlock>
+
+                <Button Background="#9d9d9d" Grid.Column="0" Grid.Row="4" Margin="4" MinWidth="80" MinHeight="30" Click="Button_Click" Name="Start">
+                    <Button.Effect>
+                        <DropShadowEffect ShadowDepth="3"/>
+                    </Button.Effect>
+                    Start
+                </Button>
+                
+                <Button Background="#9d9d9d" Grid.Column="0" Grid.Row="6" Margin="4" MinWidth="80" MinHeight="30" Click="Button_Click_1" Name="Stop">
+                    <Button.Effect>
+                        <DropShadowEffect ShadowDepth="3"/>
+                    </Button.Effect>
+                    Stop
+                </Button>
+            </Grid>
+
+        </DockPanel>
+    </Border>
 </Window>

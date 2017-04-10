@@ -16,20 +16,29 @@ namespace Screen_Color
         public string bottom { get; set; }
     }
 
+    public class ConsoleEventArgs : EventArgs
+    {
+        public string console { get; set; }
+    }
+
     public class Screen
     {
+        SerialPort port = null;
         bool state { get; set; }
         public string COM { get; set; }
         public Point[] top_Coords = new Point[5];
         public Point[] bottom_Coords = new Point[5];
+        public string error { get; set; }
 
         public event EventHandler<StringEventArgs> CoordsReceived;
+        public event EventHandler<ConsoleEventArgs> ConsoleOutput;
 
         CancellationTokenSource cts = null;
         public Screen()
         {
             state = false;
             COM = "COM3";
+            error = "";
         }
         static public Bitmap CaptureFromScreen(Rectangle rect)
         {
@@ -112,6 +121,11 @@ namespace Screen_Color
         {
             return state;
         }
+
+        public SerialPort getPort()
+        {
+            return port;
+        }
         /// <summary>
         /// Main loop for controlling the leds
         /// </summary>
@@ -120,16 +134,17 @@ namespace Screen_Color
         {
 
 
-
-            SerialPort port = new SerialPort(COM, 9600);
-            port.Open();
-            List<System.Drawing.Color>[] horizontals = new List<System.Drawing.Color>[2];
+            port = new SerialPort(COM, 9600);
+            try
+            {
+                port.Open();
+                List<System.Drawing.Color>[] horizontals = new List<System.Drawing.Color>[2];
                 while (state)
                 {
                     horizontals[0] = horizontalColors(new Point(0, 50), (int)SystemParameters.PrimaryScreenWidth, 4, 5, top_Coords);
                     horizontals[1] = horizontalColors(new Point(0, (int)SystemParameters.PrimaryScreenHeight - 50), (int)System.Windows.SystemParameters.PrimaryScreenWidth, 4, 5, bottom_Coords);
                     horizontals[0].Reverse();
-                //Helper.averageColor(points, port);
+                    //Helper.averageColor(points, port);
                     if (CoordsReceived != null)
                     {
                         string coords1 = null;
@@ -139,12 +154,32 @@ namespace Screen_Color
                         for (int i = 0; i < bottom_Coords.Count(); i++)
                             coords2 += bottom_Coords[i];
 
-                    CoordsReceived(this, new StringEventArgs() { top = coords1,
-                                                               bottom = coords2 });
+                        CoordsReceived(this, new StringEventArgs()
+                        {
+                            top = coords1,
+                            bottom = coords2,
+                        });
                     }
-                serialWrite(horizontals, port);
+                    ConsoleOutput(this, new ConsoleEventArgs()
+                    {
+                        console = ""
+                    });
+                    serialWrite(horizontals, port);
                 }
-            port.Close();
+                port.Close();
+            }
+            catch (Exception e)
+            {
+                if(ConsoleOutput!=null)
+                error = e.Message;
+                ConsoleOutput(this, new ConsoleEventArgs()
+                {
+                    console = error
+                });
+
+                Console.WriteLine(e);
+            }
+            port.Dispose();
         }
         /// <summary>
         /// Write the color arrays to Serial Port
