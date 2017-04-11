@@ -43,8 +43,10 @@ namespace AmbiArduLight
             screen.ConsoleOutput += Set_Console;
             if (!screen.getState())
             {
-                text_state.Text = "Running";
+                
                 screen.start();
+                if (screen.getState())
+                    text_state.Text = "Running";
             }
         }
 

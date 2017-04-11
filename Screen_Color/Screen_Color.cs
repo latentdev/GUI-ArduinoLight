@@ -37,7 +37,7 @@ namespace Screen_Color
         public Screen()
         {
             state = false;
-            COM = "COM3";
+            COM = "";
             error = "";
         }
         static public Bitmap CaptureFromScreen(Rectangle rect)
@@ -108,7 +108,7 @@ namespace Screen_Color
         }
         public void start()
         {
-            state = true;
+
             cts = new CancellationTokenSource();
             ThreadPool.QueueUserWorkItem(new WaitCallback(loop), cts.Token);
         }
@@ -126,61 +126,90 @@ namespace Screen_Color
         {
             return port;
         }
+
+        public void writeClear()
+        {
+            List<Color>[] clear = new List<Color>[2];
+
+            for (int i = 0; i < 2; i++)
+            {
+                for (int m = 0; m < 5; m++)
+                {
+                    clear[i] = new List<Color>();
+                    clear[i].Add(Color.Black);
+                }
+            }
+            serialWrite(clear, port);
+        }
+
         /// <summary>
         /// Main loop for controlling the leds
         /// </summary>
         /// <param name="obj"></param>
         public void loop(object obj)
         {
-
-
-            port = new SerialPort(COM, 9600);
             try
             {
-                port.Open();
-                List<System.Drawing.Color>[] horizontals = new List<System.Drawing.Color>[2];
-                while (state)
-                {
-                    horizontals[0] = horizontalColors(new Point(0, 50), (int)SystemParameters.PrimaryScreenWidth, 4, 5, top_Coords);
-                    horizontals[1] = horizontalColors(new Point(0, (int)SystemParameters.PrimaryScreenHeight - 50), (int)System.Windows.SystemParameters.PrimaryScreenWidth, 4, 5, bottom_Coords);
-                    horizontals[0].Reverse();
-                    //Helper.averageColor(points, port);
-                    if (CoordsReceived != null)
-                    {
-                        string coords1 = null;
-                        string coords2 = null;
-                        for (int i = 0; i < top_Coords.Count(); i++)
-                            coords1 += top_Coords[i];
-                        for (int i = 0; i < bottom_Coords.Count(); i++)
-                            coords2 += bottom_Coords[i];
+                port = new SerialPort(COM, 9600);
 
-                        CoordsReceived(this, new StringEventArgs()
+                try
+                {
+                    state = true;
+                    port.Open();
+                    List<Color>[] horizontals = new List<Color>[2];
+                    while (state)
+                    {
+                        horizontals[0] = horizontalColors(new Point(0, 50), (int)SystemParameters.PrimaryScreenWidth, 4, 5, top_Coords);
+                        horizontals[1] = horizontalColors(new Point(0, (int)SystemParameters.PrimaryScreenHeight - 50), (int)System.Windows.SystemParameters.PrimaryScreenWidth, 4, 5, bottom_Coords);
+                        horizontals[0].Reverse();
+                        //Helper.averageColor(points, port);
+                        if (CoordsReceived != null)
                         {
-                            top = coords1,
-                            bottom = coords2,
+                            string coords1 = null;
+                            string coords2 = null;
+                            for (int i = 0; i < top_Coords.Count(); i++)
+                                coords1 += top_Coords[i];
+                            for (int i = 0; i < bottom_Coords.Count(); i++)
+                                coords2 += bottom_Coords[i];
+
+                            CoordsReceived(this, new StringEventArgs()
+                            {
+                                top = coords1,
+                                bottom = coords2,
+                            });
+                        }
+                        ConsoleOutput(this, new ConsoleEventArgs()
+                        {
+                            console = ""
                         });
+                        serialWrite(horizontals, port);
                     }
+                    //writeClear();
+                    port.Close();
+                }
+                catch (Exception e)
+                {
+                    if (ConsoleOutput != null)
+                        error = e.Message;
                     ConsoleOutput(this, new ConsoleEventArgs()
                     {
-                        console = ""
+                        console = error
                     });
-                    serialWrite(horizontals, port);
+
+                    Console.WriteLine(e);
                 }
-                port.Close();
+                port.Dispose();
             }
             catch (Exception e)
             {
-                if(ConsoleOutput!=null)
-                error = e.Message;
+                if (ConsoleOutput != null)
+                    error = "You must choose a port";
                 ConsoleOutput(this, new ConsoleEventArgs()
-                {
-                    console = error
-                });
-
-                Console.WriteLine(e);
+            {
+            console = error
+            });
             }
-            port.Dispose();
-        }
+}
         /// <summary>
         /// Write the color arrays to Serial Port
         /// </summary>
