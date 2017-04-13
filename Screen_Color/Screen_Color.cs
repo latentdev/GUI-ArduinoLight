@@ -26,6 +26,10 @@ namespace Screen_Color
         SerialPort port = null;
         bool state { get; set; }
         public string COM { get; set; }
+        /// <summary>
+        /// an array of the # of points used on each side (left, top, right and bottom)
+        /// </summary>
+        public int[] points = new int[4];
         public Point[] top_Coords = new Point[5];
         public Point[] bottom_Coords = new Point[5];
         public string error { get; set; }
@@ -39,6 +43,10 @@ namespace Screen_Color
             state = false;
             COM = "";
             error = "";
+            points[0] = 5;
+            points[1] = 5;
+            points[2] = 5;
+            points[3] = 5;
         }
         static public Bitmap CaptureFromScreen(Rectangle rect)
         {
@@ -79,7 +87,11 @@ namespace Screen_Color
         {
 
             List<Color> colors = new List<Color>();
-            int offset = x / points;
+            int offset;
+            if (points != 0)
+                offset = x / points;
+            else
+                offset = 0;
 
             Rectangle rect = new Rectangle(p, new Size(x, y));
 
@@ -101,6 +113,10 @@ namespace Screen_Color
             return colors;
         }
 
+        public void setPoints(int [] in_points)
+        {
+            points = in_points;
+        }
         static public string getCOM()
         {
             string blah = null;
@@ -108,13 +124,22 @@ namespace Screen_Color
         }
         public void start()
         {
+            if(cts==null|| cts.IsCancellationRequested)
+                cts = new CancellationTokenSource();
 
-            cts = new CancellationTokenSource();
             ThreadPool.QueueUserWorkItem(new WaitCallback(loop), cts.Token);
         }
         public void stop()
         {
             state = false;
+            if (!cts.IsCancellationRequested)
+            {
+
+                cts.Cancel();
+                cts.Dispose();
+
+            }
+            serialWriteStop();
         }
 
         public bool getState()
@@ -159,8 +184,8 @@ namespace Screen_Color
                     List<Color>[] horizontals = new List<Color>[2];
                     while (state)
                     {
-                        horizontals[0] = horizontalColors(new Point(0, 50), (int)SystemParameters.PrimaryScreenWidth, 4, 5, top_Coords);
-                        horizontals[1] = horizontalColors(new Point(0, (int)SystemParameters.PrimaryScreenHeight - 50), (int)System.Windows.SystemParameters.PrimaryScreenWidth, 4, 5, bottom_Coords);
+                        horizontals[0] = horizontalColors(new Point(0, 50), (int)SystemParameters.PrimaryScreenWidth, 4, points[1], top_Coords);
+                        horizontals[1] = horizontalColors(new Point(0, (int)SystemParameters.PrimaryScreenHeight - 50), (int)System.Windows.SystemParameters.PrimaryScreenWidth, 4, points[3], bottom_Coords);
                         horizontals[0].Reverse();
                         //Helper.averageColor(points, port);
                         if (CoordsReceived != null)
@@ -185,7 +210,7 @@ namespace Screen_Color
                         serialWrite(horizontals, port);
                     }
                     //writeClear();
-                    port.Close();
+                    //port.Close();
                 }
                 catch (Exception e)
                 {
@@ -195,10 +220,10 @@ namespace Screen_Color
                     {
                         console = error
                     });
-
+                    state = false;
                     Console.WriteLine(e);
                 }
-                port.Dispose();
+                //port.Dispose();
             }
             catch (Exception e)
             {
@@ -210,6 +235,27 @@ namespace Screen_Color
             });
             }
 }
+
+        public void serialWriteStop()
+        {
+            char letter = 'E';
+            int count = points[1] + points[3];
+            byte[] buffer = new byte[] { Convert.ToByte(letter) };
+            port.Write(buffer, 0 ,1);
+            buffer = new byte[] { Convert.ToByte(count) };
+            port.Write(buffer, 0, 1);
+            for (int i=0;i<count;i++)
+            {
+                buffer = new byte[] { Convert.ToByte(0) };
+                port.Write(buffer, 0, 1);
+                buffer = new byte[] { Convert.ToByte(0) };
+                port.Write(buffer, 0, 1);
+                buffer = new byte[] { Convert.ToByte(0) };
+                port.Write(buffer, 0, 1);
+            }
+            port.Close();
+            port.Dispose();
+        }
         /// <summary>
         /// Write the color arrays to Serial Port
         /// </summary>

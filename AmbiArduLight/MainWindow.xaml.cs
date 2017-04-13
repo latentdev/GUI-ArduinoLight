@@ -41,6 +41,12 @@ namespace AmbiArduLight
         {
             screen.CoordsReceived += Set_Text;
             screen.ConsoleOutput += Set_Console;
+            int[] points = new int[4];
+            points[0] = int.Parse(points_left.Text);
+            points[1] = int.Parse(points_top.Text);
+            points[2] = int.Parse(points_right.Text);
+            points[3] = int.Parse(points_bottom.Text);
+            screen.setPoints(points);
             if (!screen.getState())
             {
                 

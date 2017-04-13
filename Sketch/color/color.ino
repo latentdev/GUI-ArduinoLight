@@ -13,7 +13,7 @@ int incomingByte = 0;   // for incoming serial data
 
 char val = 0;
 int count = 0;
-int m = 0;
+int oldcount = 0;
 RGB row [5];
 void setup() {
   // put your setup code here, to run once:
@@ -22,7 +22,7 @@ void setup() {
 }
 
 void loop() {
-
+    oldcount = 0;
     if (Serial.available()) {             // If data is available to read,
       val = Serial.read();                // read it and store it in val
   
@@ -30,8 +30,8 @@ void loop() {
       if (val == 'T') {  
         while (!Serial.available()) {}
         count = Serial.read();
-        
-        for (int i=0;i<5;i++)
+        oldcount = count;
+        for (int i=0;i<count;i++)
         {
           while (!Serial.available()) {}    //Wait until next value.
           row[i].red = Serial.read();              //Once available, assign.
@@ -51,8 +51,24 @@ void loop() {
       if (val == 'B') {  
         while (!Serial.available()) {}
         count = Serial.read();
-        
-        for (int i=5;i<10;i++)
+        oldcount = count;
+        for (int i=count;i<count+oldcount;i++)
+        {
+          while (!Serial.available()) {}    //Wait until next value.
+          row[i].red = Serial.read();              //Once available, assign.
+
+          while (!Serial.available()) {}    //Same as above.
+          row[i].green = Serial.read();
+
+          while (!Serial.available()) {}
+          row[i].blue = Serial.read();
+        }
+      }
+
+      if (val == 'E') {  
+        while (!Serial.available()) {}
+        count = Serial.read();
+        for (int i=0;i<count;i++)
         {
           while (!Serial.available()) {}    //Wait until next value.
           row[i].red = Serial.read();              //Once available, assign.
@@ -66,11 +82,9 @@ void loop() {
       }
       }
     // Loop through each pixel and set it to the appropriate value.
-    for(int i=0; i<10; i++) {
+    for(int i=0; i<count+oldcount; i++) {
       CircuitPlayground.strip.setPixelColor(i, row[i].red, row[i].green, row[i].blue);
-      m+=1;
     }
-    m = 0;
     // Show all the pixels.
     CircuitPlayground.strip.show();
 
