@@ -49,7 +49,6 @@ namespace AmbiArduLight
             screen.setPoints(points);
             if (!screen.getState())
             {
-                
                 screen.start();
                 if (screen.getState())
                     text_state.Text = "Running";

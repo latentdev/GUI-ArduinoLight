@@ -23,21 +23,49 @@ namespace Screen_Color
 
     public class Screen
     {
+        /// <summary>
+        /// port to be used for writing color data
+        /// </summary>
         SerialPort port = null;
+        /// <summary>
+        /// state of the main loop. true = running. false = stopped
+        /// </summary>
         bool state { get; set; }
+        /// <summary>
+        /// String containing COM port to use
+        /// </summary>
         public string COM { get; set; }
         /// <summary>
         /// an array of the # of points used on each side (left, top, right and bottom)
         /// </summary>
         public int[] points = new int[4];
+        /// <summary>
+        /// coordinates sampled along the top of the screen
+        /// </summary>
         public Point[] top_Coords = new Point[5];
+        /// <summary>
+        /// coordinates sampled along the bottom of the screen
+        /// </summary>
         public Point[] bottom_Coords = new Point[5];
+        /// <summary>
+        /// string containing error to display on GUI
+        /// </summary>
         public string error { get; set; }
-
+        /// <summary>
+        /// eventhandler for coordinates updating
+        /// </summary>
         public event EventHandler<StringEventArgs> CoordsReceived;
+        /// <summary>
+        /// eventhandler for console output changing
+        /// </summary>
         public event EventHandler<ConsoleEventArgs> ConsoleOutput;
-
+        /// <summary>
+        /// token used for cancelling main loop
+        /// </summary>
         CancellationTokenSource cts = null;
+        /// <summary>
+        /// default constructor. sets needed values to defaults.
+        /// </summary>
         public Screen()
         {
             state = false;
@@ -48,6 +76,11 @@ namespace Screen_Color
             points[2] = 5;
             points[3] = 5;
         }
+        /// <summary>
+        /// grabs a bitmap of the screen based off the size of the given rectangle
+        /// </summary>
+        /// <param name="rect">rectangle containing an origin point and size of the area of the screen you want to capture</param>
+        /// <returns>bitmap containing the section of the screen defined by the rectangle passed in</returns>
         static public Bitmap CaptureFromScreen(Rectangle rect)
         {
             Bitmap bmpScreenCapture = null;
@@ -82,7 +115,15 @@ namespace Screen_Color
 
             return bmpScreenCapture;
         }
-
+        /// <summary>
+        /// samples a bitmap for pixel colors, storing them in a list and returning it.
+        /// </summary>
+        /// <param name="p">Origin point for the rectangle that will be the bitmap</param>
+        /// <param name="x">Width of the rectangle that will be the bitmap</param>
+        /// <param name="y">Height of the rectangle that will be the bitmap</param>
+        /// <param name="points">Number of points to sample from the bitmap</param>
+        /// <param name="coords">Array that stores sampled pixel coordinates</param>
+        /// <returns>A list of sampled pixel colors</returns>
         static public List<Color> horizontalColors(Point p, int x, int y, int points, Point[] coords)
         {
 
@@ -113,15 +154,27 @@ namespace Screen_Color
             return colors;
         }
 
+        /// <summary>
+        /// sets the number of points used on each side of screen (left,top,right and bottom). Array passed in should always be 4 long (unless your monitor has more than 4 sides?)
+        /// </summary>
+        /// <param name="in_points">an integer array containing the number of points to use on each side</param>
         public void setPoints(int [] in_points)
         {
             points = in_points;
         }
+
+        /// <summary>
+        /// return COM port
+        /// </summary>
+        /// <returns></returns>
         static public string getCOM()
         {
             string blah = null;
             return blah;
         }
+        /// <summary>
+        /// Start event for main loop
+        /// </summary>
         public void start()
         {
             if(cts==null|| cts.IsCancellationRequested)
@@ -129,42 +182,51 @@ namespace Screen_Color
 
             ThreadPool.QueueUserWorkItem(new WaitCallback(loop), cts.Token);
         }
+
+        /// <summary>
+        /// stop event for main loop
+        /// </summary>
         public void stop()
         {
             state = false;
-            if (!cts.IsCancellationRequested)
+            if (cts != null)
             {
+                if (!cts.IsCancellationRequested)
+                {
 
-                cts.Cancel();
-                cts.Dispose();
+                    cts.Cancel();
+                    try
+                    {
+                        Task.WaitAll();
+                    }
+                    catch (Exception e)
+                    {
 
+                    }
+                    finally
+                    {
+                        cts.Dispose();
+                    }
+
+                }
             }
             serialWriteStop();
         }
-
+        /// <summary>
+        /// get the state of the main loop. true = running. false = stopped.
+        /// </summary>
+        /// <returns>state of the main loop</returns>
         public bool getState()
         {
             return state;
         }
-
+        /// <summary>
+        /// get the port.
+        /// </summary>
+        /// <returns>returns the current port</returns>
         public SerialPort getPort()
         {
             return port;
-        }
-
-        public void writeClear()
-        {
-            List<Color>[] clear = new List<Color>[2];
-
-            for (int i = 0; i < 2; i++)
-            {
-                for (int m = 0; m < 5; m++)
-                {
-                    clear[i] = new List<Color>();
-                    clear[i].Add(Color.Black);
-                }
-            }
-            serialWrite(clear, port);
         }
 
         /// <summary>
@@ -235,7 +297,9 @@ namespace Screen_Color
             });
             }
 }
-
+        /// <summary>
+        /// writes to serial a clear state to turn leds off.
+        /// </summary>
         public void serialWriteStop()
         {
             char letter = 'E';
