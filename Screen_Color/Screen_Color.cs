@@ -246,8 +246,8 @@ namespace Screen_Color
                     List<Color>[] horizontals = new List<Color>[2];
                     while (state)
                     {
-                        horizontals[0] = horizontalColors(new Point(0, 50), (int)SystemParameters.PrimaryScreenWidth, 4, points[1], top_Coords);
-                        horizontals[1] = horizontalColors(new Point(0, (int)SystemParameters.PrimaryScreenHeight - 50), (int)System.Windows.SystemParameters.PrimaryScreenWidth, 4, points[3], bottom_Coords);
+                        horizontals[0] = horizontalColors(new Point(0, 300), (int)SystemParameters.PrimaryScreenWidth, 4, points[1], top_Coords);
+                        horizontals[1] = horizontalColors(new Point(0, (int)SystemParameters.PrimaryScreenHeight - 300), (int)System.Windows.SystemParameters.PrimaryScreenWidth, 4, points[3], bottom_Coords);
                         horizontals[0].Reverse();
                         //Helper.averageColor(points, port);
                         if (CoordsReceived != null)
