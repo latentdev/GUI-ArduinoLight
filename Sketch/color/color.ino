@@ -14,6 +14,7 @@ int incomingByte = 0;   // for incoming serial data
 char val = 0;
 int count = 0;
 int oldcount = 0;
+bool running = false;
 RGB row [5];
 void setup() {
   // put your setup code here, to run once:
@@ -28,6 +29,7 @@ void loop() {
   
 
       if (val == 'T') {  
+        running = true;
         while (!Serial.available()) {}
         count = Serial.read();
         oldcount = count;
@@ -49,6 +51,7 @@ void loop() {
   
 
       if (val == 'B') {  
+        running = true;
         while (!Serial.available()) {}
         count = Serial.read();
         oldcount = count;
@@ -66,7 +69,11 @@ void loop() {
       }
 
       if (val == 'E') {  
-        while (!Serial.available()) {}
+        running = false;
+        CircuitPlayground.clearPixels();
+        
+        
+        /*while (!Serial.available()) {}
         count = Serial.read();
         for (int i=0;i<count;i++)
         {
@@ -78,14 +85,20 @@ void loop() {
 
           while (!Serial.available()) {}
           row[i].blue = Serial.read();
-        }
+        }*/
       }
       }
     // Loop through each pixel and set it to the appropriate value.
-    for(int i=0; i<count+oldcount; i++) {
+    if(running==true)
+    {
+      for(int i=0; i<count+oldcount; i++) 
+      {
       CircuitPlayground.strip.setPixelColor(i, row[i].red, row[i].green, row[i].blue);
-    }
+      }
     // Show all the pixels.
-    CircuitPlayground.strip.show();
+      CircuitPlayground.strip.show();
+    }
+    else
+      CircuitPlayground.clearPixels();
 
 }
